@@ -211,21 +211,28 @@ namespace MvvmCross.Droid.Support.V7.RecyclerView
                 switch (e.Action)
                 {
                     case NotifyCollectionChangedAction.Add:
+                        if (e.NewStartingIndex == -1)
+                            goto case NotifyCollectionChangedAction.Reset;
                         NotifyItemRangeInserted(e.NewStartingIndex, e.NewItems.Count);
                         break;
                     case NotifyCollectionChangedAction.Move:
+                        if (e.OldStartingIndex == -1 || e.NewStartingIndex == -1)
+                            goto case NotifyCollectionChangedAction.Reset;
                         for (int i = 0; i < e.NewItems.Count; i++)
                         {
-                            var oldItem = e.OldItems[i];
-                            var newItem = e.NewItems[i];
-
-                            NotifyItemMoved(this.ItemsSource.GetPosition(oldItem), this.ItemsSource.GetPosition(newItem));
+                            var oldPosition = e.OldStartingIndex + i;
+                            var newPosition = e.NewStartingIndex + i;
+                            NotifyItemMoved(oldPosition, newPosition);
                         }
                         break;
                     case NotifyCollectionChangedAction.Replace:
-                        NotifyItemRangeChanged(e.NewStartingIndex, e.NewItems.Count);
+                        if (e.OldStartingIndex == -1)
+                            goto case NotifyCollectionChangedAction.Reset;
+                        NotifyItemRangeChanged(e.OldStartingIndex, e.OldItems.Count);
                         break;
                     case NotifyCollectionChangedAction.Remove:
+                        if (e.OldStartingIndex == -1)
+                            goto case NotifyCollectionChangedAction.Reset;
                         NotifyItemRangeRemoved(e.OldStartingIndex, e.OldItems.Count);
                         break;
                     case NotifyCollectionChangedAction.Reset:
